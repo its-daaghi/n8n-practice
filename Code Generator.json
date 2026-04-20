@@ -1,0 +1,150 @@
+{
+  "name": "Code Generator",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -432,
+        -48
+      ],
+      "id": "5c4867fc-637a-4c37-9bf2-ae1a7c89c365",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "JSON",
+        "body": "={\n  \"model\": \"llama-3.1-8b-instant\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"You are a code generator.\\n\\nSTRICT RULES:\\n- Output ONLY valid Python code\\n- NO explanations\\n- NO text before or after\\n- NO markdown\\n\\nGenerate a Python script (10–50 lines, beginner friendly, different every time).\\n\\nTimestamp: {{$json.timestamp}}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -240,
+        -32
+      ],
+      "id": "b3534075-35cb-4205-aae7-92a5a50c41d6",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b9cc859b-db8e-4bfb-bd1d-afa93bc8842e",
+              "name": "clean_text",
+              "value": "=Code:\n{{ $json.choices[0].message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -64,
+        -48
+      ],
+      "id": "b8a852f1-722b-4cdb-a745-8a17b45e6a79",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "sendTo": "1muhammadahmad0313@gmail.com",
+        "subject": "Python Sample Code",
+        "message": "=<h2 style=\"color:#2c3e50;\">🚀 Your AI Generated Python Code</h2>\n\n<p>Hello,</p>\n\n<p>Here is your latest Python script generated automatically:</p>\n\n<pre style=\"background:#f4f4f4; padding:15px; border-radius:8px; overflow:auto;\">\n{{ $json.clean_text }}\n</pre>\n\n<p style=\"margin-top:20px;\">Happy Coding 😎</p>\n\n<hr>\n\n<p style=\"font-size:12px; color:gray;\">\nGenerated automatically by your n8n workflow\n</p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        144,
+        -48
+      ],
+      "id": "8a783083-5aa7-469c-91ce-fa6c6489fb03",
+      "name": "Send a message",
+      "webhookId": "ffb29b19-355f-4283-b428-868b83e72ab7",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "xIu3uwhDnzK4xiW5",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "97a8f966-adb2-49b2-9d9f-068418c49e97",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "84bb5f1de3e0c2e0827dcb6d1c2a0f7052ed110374f922dec8b534421aa04c2e"
+  },
+  "id": "zWzy3CZqsCMsIarK",
+  "tags": []
+}
