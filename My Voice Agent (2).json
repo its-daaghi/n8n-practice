@@ -1,0 +1,203 @@
+{
+  "name": "My Voice Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.searchQuery }}",
+        "options": {
+          "systemMessage": "You are an AI agent that manages information in a Google Sheet. Your job is to read incoming chat messages, review the current sheet data And answer the user query\n\nWhatever question the user asks always go to the Google Sheet to refer for the answer\n\n## Core Process\n\n1. **Read the message**: Understand what the user is asking for or reporting\n2. **Review the sheet**: Use the read tool to get current data from all relevant sections\n3. **Analyze**: Determine what information needs to be shared\n4. Check Availability : Use the Calendar Get tool to check the availability\n5. Book Session : Use the Create Calendar tool to book the session \n6. **Confirm**: Once the client gives the confirmation shoot a mail of the confirmation to the client using the Send email tool \n\n\n\n\n## Guidelines\n\n- Always read the sheet first before answering any query\n- If the message is unclear, ask for clarification\n- Provide a brief summary of what you updated after making changes\n\n## Response Format\n\n1. Read the current sheet data\n\nStay focused, efficient, and accurate in your updates.\n\nIf the user asks something and the data is not available on the sheet, Tell the user that you couldn't provide the information because of the privacy reason.\n\nNever mention  \"in the sheet\" to the user instead mention \"in the database\"\n\nKeep all the responses as concise as possible and not more than three lines or three sentences\n\nIf the user asks for date availability use the calendar tool to check the availability on those dates\n\nWhen the user asks for the booking confirmation and everything ask him or her his full an email address and then schedule an event Also in creating the event add the details.\n\nIf you are booking or checking the availability never say ‘event’  always say Slot\n\nWhen booking calendar slots:\n\nYou MUST provide ONLY these fields:\n- Start\n- End\n\nRules:\n- Use exact field names: Start, End\n- Use ISO 8601 format only\n- Timezone must be Asia/Karachi (+05:00)\n- Never return markdown\n- Never explain anything\n- Never include extra fields\n- Never use past dates\n- Never use natural language dates\n- Always use ISO 8601 date format\n- Never use words like \"tomorrow\", \"next week\"\n- Always include start and end\n-Always use current or future dates only.\n\nBefore creating any slot:\n\n1. ALWAYS use the Calendar Get tool first to check availability.\n2. If a slot already exists during that time, DO NOT create a new slot.\n3. Instead reply:\n\"You already have a slot booked at that time. Please choose another time.\"\n4. Only use the Create Calendar tool if the requested time is free.\n\nCorrect example:\n\n{\n  \"Start\": \"2026-05-10T14:00:00+05:00\",\n  \"End\": \"2026-05-10T15:00:00+05:00\"\n}\n\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        192,
+        96
+      ],
+      "id": "74392f8b-6044-4475-b106-76966dd5df66",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1dtkuyC-zvvqtD-zL9ENSg7ZyLjJ3GK__m2RrAseLtCM",
+          "mode": "list",
+          "cachedResultName": "Digital Markiting agency details",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dtkuyC-zvvqtD-zL9ENSg7ZyLjJ3GK__m2RrAseLtCM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1dtkuyC-zvvqtD-zL9ENSg7ZyLjJ3GK__m2RrAseLtCM/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        96,
+        368
+      ],
+      "id": "2ce7fbd1-ae65-4a7a-9f18-f68c709420c3",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "RwMrcuTIJIRvXy6A",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "1muhammadahmad0313@gmail.com",
+          "mode": "list",
+          "cachedResultName": "1muhammadahmad0313@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "useDefaultReminders": false,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        352
+      ],
+      "id": "04887d56-afa6-4257-8574-d6187edb20fb",
+      "name": "Create an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "mc6gvdzqRxuALD8d",
+          "name": "Google Calendar OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        352
+      ],
+      "id": "28cf9ad2-2709-4ee5-b7e3-2e696a50267a",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "G2l8zGLqa0Ch1gfk",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "informationagent",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -144,
+        80
+      ],
+      "id": "f273709f-ad71-4245-8452-e66d7226cc3d",
+      "name": "Webhook",
+      "webhookId": "d6c9dc09-0877-482a-9e3d-aab78ded76f0"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        544,
+        96
+      ],
+      "id": "7f0be9b1-71b5-42ad-87cd-0495323173e7",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "39707524-6901-469a-9747-f1a23c975bfc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "553e34313251cf57b000720c3811bcd1905ab3a6ec8d37c42929386f1e7bd804"
+  },
+  "id": "syRj4DjKA6s8y8lv",
+  "tags": []
+}
